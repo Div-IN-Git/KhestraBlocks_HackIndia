@@ -50,16 +50,12 @@ git push origin <your-branch>
 ### 3) Set environment variables (recommended)
 In Vercel Project Settings → Environment Variables, add:
 - `SECRET_KEY`: a random secure string.
-- Optional: `LANDCHAIN_DB_PATH` (defaults to `/tmp/landchain.db` on Vercel).
-- Optional: `LANDCHAIN_UPLOAD_DIR` (defaults to `/tmp/landchain_uploads` on Vercel).
 
 ### 4) Redeploy
 Trigger redeploy after adding env vars.
 
-### Important note about writes on Vercel
-Vercel deploy output (`/var/task`) is read-only. This app is configured to write DB/uploads under `/tmp` when `VERCEL` is detected, so startup/import works in serverless runtime.
-
-`/tmp` is still ephemeral across deployments/cold starts, so `landchain.db` is not durable long-term.
+### Important note about SQLite on Vercel
+Vercel serverless filesystem is ephemeral, so `landchain.db` is not durable across cold starts/deployments.
 
 For hackathon demo this is usually fine. For persistent production-style data, switch to a hosted DB (e.g., Neon/Postgres, Supabase, PlanetScale, or Turso).
 

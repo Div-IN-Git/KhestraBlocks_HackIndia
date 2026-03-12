@@ -1,25 +1,10 @@
 import os
 import sqlite3
 
-
-# Vercel's deployment filesystem (/var/task) is read-only.
-# Use /tmp for writable runtime storage when running on Vercel, unless explicitly overridden.
-def resolve_db_path() -> str:
-    custom = os.environ.get("LANDCHAIN_DB_PATH")
-    if custom:
-        return custom
-    if os.environ.get("VERCEL"):
-        return "/tmp/landchain.db"
-    return os.path.join(os.path.dirname(__file__), "landchain.db")
-
-
-DB_PATH = resolve_db_path()
+DB_PATH = os.path.join(os.path.dirname(__file__), "landchain.db")
 
 
 def get_db_connection():
-    db_dir = os.path.dirname(DB_PATH)
-    if db_dir:
-        os.makedirs(db_dir, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn

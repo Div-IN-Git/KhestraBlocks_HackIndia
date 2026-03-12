@@ -3,25 +3,13 @@ import secrets
 from functools import wraps
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from werkzeug.utils import secure_filename
 
 from blockchain import FakeBlockchain
 from db import get_db_connection, init_db
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "landchain-secret-key")
-
-
-def resolve_upload_folder() -> str:
-    custom = os.environ.get("LANDCHAIN_UPLOAD_DIR")
-    if custom:
-        return custom
-    if os.environ.get("VERCEL"):
-        return "/tmp/landchain_uploads"
-    return os.path.join(os.path.dirname(__file__), "uploads")
-
-
-app.config["UPLOAD_FOLDER"] = resolve_upload_folder()
+app.config["UPLOAD_FOLDER"] = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 
@@ -108,7 +96,7 @@ def verify_identity():
     docs = {}
     for label, f in {"aadhaar": aadhaar, "gov": gov_id, "property": prop_doc}.items():
         if f and f.filename:
-            filename = f"{datetime.utcnow().timestamp()}_{label}_{secure_filename(f.filename)}"
+            filename = f"{datetime.utcnow().timestamp()}_{label}_{f.filename}"
             path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
             f.save(path)
             docs[label] = filename
@@ -239,7 +227,7 @@ def transfer_property(property_id):
     agreement = request.files.get("sale_agreement")
     agreement_filename = ""
     if agreement and agreement.filename:
-        agreement_filename = f"{datetime.utcnow().timestamp()}_agreement_{secure_filename(agreement.filename)}"
+        agreement_filename = f"{datetime.utcnow().timestamp()}_agreement_{agreement.filename}"
         agreement.save(os.path.join(app.config["UPLOAD_FOLDER"], agreement_filename))
 
     conn = get_db_connection()
